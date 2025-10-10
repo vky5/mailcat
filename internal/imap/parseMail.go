@@ -6,17 +6,10 @@ import (
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-message/mail"
+	"github.com/vky5/mailcat/internal/db/models"
 )
 
-type Email struct {
-	From    string
-	To      []string
-	Subject string
-	Body    string
-	Date    time.Time
-}
-
-func parseMails(msg *imap.Message, emails []Email) []Email { // using pointer to save memory
+func parseMails(msg *imap.Message, emails []models.Email) []models.Email { // using pointer to save memory
 	section := &imap.BodySectionName{} // give the entire body fo the message including headers and texts
 	// section := &imap.BodySectionName{Peek: true, Path: []string{"TEXT"}} // if u want only text part // msg.GetBody(section)
 
@@ -62,8 +55,8 @@ func parseMails(msg *imap.Message, emails []Email) []Email { // using pointer to
 	var date time.Time
 
 	/*
-	this data is in msg.Envelope
-	body and attachment is in msg.Body which is gotten by msg.GetBody()
+		this data is in msg.Envelope
+		body and attachment is in msg.Body which is gotten by msg.GetBody()
 
 	*/
 
@@ -84,7 +77,7 @@ func parseMails(msg *imap.Message, emails []Email) []Email { // using pointer to
 	}
 
 	// Append the parsed email to the slice
-	emails = append(emails, Email{
+	emails = append(emails, models.Email{
 		From:    from,
 		To:      to,
 		Subject: subject,
@@ -94,7 +87,6 @@ func parseMails(msg *imap.Message, emails []Email) []Email { // using pointer to
 
 	return emails
 }
-
 
 /*
 GetBody gives you the raw message stream — everything including attachments, but not in a usable form yet.
