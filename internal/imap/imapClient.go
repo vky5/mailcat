@@ -91,6 +91,7 @@ func FetchEmails(conn *client.Client, pageSize int, pageNumber int) ([]models.Em
 		return nil, fmt.Errorf("failed to fetch emails: %v", err)
 	}
 
+	utils.ReverseSlice(emails)
 	return emails, nil
 }
 
