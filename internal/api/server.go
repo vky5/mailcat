@@ -10,6 +10,7 @@ func SetupServer() *gin.Engine {
 
 	// register all routes
 	routes.RegisterAccountRoutes(r)
+	routes.RegisterMailRoutes(r)
 
 	return r
 }

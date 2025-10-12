@@ -12,12 +12,11 @@ import (
 	"github.com/vky5/mailcat/internal/db/models"
 )
 
-// connection to IMAP server
-var conn *client.Client
-var err error
-
 // connect to the IMAP server
 func ConnectIMAP(acc models.Account) (*client.Client, error) {
+	// connection to IMAP server
+	var conn *client.Client
+	var err error
 
 	address := fmt.Sprintf("%s:%s", acc.Host, acc.Port)
 
@@ -48,7 +47,7 @@ func ConnectIMAP(acc models.Account) (*client.Client, error) {
 }
 
 // fetch emails
-func FetchEmails(pageSize int, pageNumber int) ([]models.Email, error) {
+func FetchEmails(conn *client.Client, pageSize int, pageNumber int) ([]models.Email, error) {
 	// select INBOX
 	mbox, err := conn.Select("INBOX", false)
 	if err != nil {
@@ -63,7 +62,7 @@ func FetchEmails(pageSize int, pageNumber int) ([]models.Email, error) {
 	from, to := utils.Paginate(int(mbox.Messages), pageSize, pageNumber) // we get the from and to values of the emails to be fetched
 
 	seqset := new(imap.SeqSet)
-	seqset.AddRange(uint32(from), uint32(to))
+	seqset.AddRange(uint32(from), uint32(to)) // critical thing about this the order is guranteed.. meaning if 41th to 50 emails are fetched they are fetched in this sequence into the channel only
 
 	// prepare the channel to fetch emails of pageSize (that is the number of emails to be fetched at a certain time)
 	messages := make(chan *imap.Message, pageSize)
@@ -100,7 +99,7 @@ func ListenNewEmails() {
 
 }
 
-func Logout() {
+func Logout(conn *client.Client) {
 	if err := conn.Logout(); err != nil {
 		log.Println("Error logging out:", err)
 	} else {
