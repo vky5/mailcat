@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vky5/mailcat/internal/db"
+	"github.com/vky5/mailcat/internal/db/models"
 	"github.com/vky5/mailcat/internal/imap"
 	"gorm.io/gorm"
 )
@@ -85,5 +87,20 @@ func streamMails(c *gin.Context) {
 	fmt.Fprintf(c.Writer, "event: batch\n")
 	fmt.Fprintf(c.Writer, "data: %s\n\n", data)
 	flusher.Flush()
+
+	newEmails := make(chan models.Email, 100)
+	go func() {
+		if err := imap.ListenNewEmails(conn, req.Mailbox, newEmails); err != nil {
+			log.Println("ListenNewEmails error:", err)
+		}
+	}()
+
+	// continously stream new emails to client
+	for email := range newEmails {
+		data, _ := json.Marshal(email)
+		fmt.Fprintf(c.Writer, "event: email\n")
+		fmt.Fprintf(c.Writer, "data: %s\n\n", data)
+		flusher.Flush()
+	}
 
 }
