@@ -9,4 +9,5 @@ type Email struct {
 	Subject string
 	Body    string
 	Date    time.Time
+	Read    bool
 }

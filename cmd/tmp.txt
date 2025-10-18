@@ -1,0 +1,477 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/gdamore/tcell/v2"
+)
+
+type Email struct {
+	ID      int
+	From    string
+	Subject string
+	Body    string
+	Date    time.Time
+	Read    bool
+}
+
+type Folder struct {
+	Name     string
+	Emails   []Email
+	Children []*Folder
+	Expanded bool
+}
+
+type EmailClient struct {
+	screen        tcell.Screen
+	folders       *Folder
+	selectedPane  int // 0=folders, 1=emails, 2=preview
+	selectedFolder *Folder
+	selectedEmail *Email
+	folderCursor  int
+	emailCursor   int
+	scrollOffset  int
+}
+
+func NewEmailClient() *EmailClient {
+	// Initialize sample data
+	root := &Folder{
+		Name:     "Email",
+		Expanded: true,
+		Children: []*Folder{
+			{
+				Name:     "Inbox",
+				Expanded: false,
+				Emails: []Email{
+					{ID: 1, From: "alice@example.com", Subject: "Meeting Tomorrow", Body: "Hi,\n\nDon't forget about our meeting tomorrow at 10 AM.\n\nBest regards,\nAlice", Date: time.Now().Add(-2 * time.Hour), Read: false},
+					{ID: 2, From: "bob@company.com", Subject: "Project Update", Body: "Hello,\n\nThe project is progressing well. We've completed phase 1 and are moving to phase 2.\n\nThanks,\nBob", Date: time.Now().Add(-5 * time.Hour), Read: true},
+					{ID: 3, From: "newsletter@tech.com", Subject: "Weekly Tech News", Body: "Your weekly digest of technology news...", Date: time.Now().Add(-24 * time.Hour), Read: false},
+					{ID: 4, From: "hr@company.com", Subject: "Holiday Schedule", Body: "Please review the updated holiday schedule for Q4.", Date: time.Now().Add(-48 * time.Hour), Read: true},
+				},
+			},
+			{
+				Name:     "Sent",
+				Expanded: false,
+				Emails: []Email{
+					{ID: 5, From: "me@myemail.com", Subject: "Re: Meeting Tomorrow", Body: "Thanks for the reminder! I'll be there.", Date: time.Now().Add(-1 * time.Hour), Read: true},
+				},
+			},
+			{
+				Name:     "Drafts",
+				Expanded: false,
+				Emails:   []Email{},
+			},
+			{
+				Name:     "Trash",
+				Expanded: false,
+				Emails: []Email{
+					{ID: 6, From: "spam@ads.com", Subject: "Buy Now!", Body: "Limited time offer...", Date: time.Now().Add(-72 * time.Hour), Read: true},
+				},
+			},
+		},
+	}
+
+	return &EmailClient{
+		folders:        root,
+		selectedPane:   0,
+		selectedFolder: root.Children[0], // Default to Inbox
+	}
+}
+
+func (ec *EmailClient) Init() error {
+	s, err := tcell.NewScreen()
+	if err != nil {
+		return err
+	}
+	if err := s.Init(); err != nil {
+		return err
+	}
+	s.SetStyle(tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset))
+	s.Clear()
+	ec.screen = s
+	return nil
+}
+
+func (ec *EmailClient) Run() {
+	ec.Draw()
+	for {
+		ev := ec.screen.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventResize:
+			ec.screen.Sync()
+			ec.Draw()
+		case *tcell.EventKey:
+			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+				return
+			}
+			ec.HandleInput(ev)
+			ec.Draw()
+		}
+	}
+}
+
+func (ec *EmailClient) HandleInput(ev *tcell.EventKey) {
+	switch ev.Key() {
+	case tcell.KeyTab:
+		ec.selectedPane = (ec.selectedPane + 1) % 3
+		if ec.selectedPane == 2 && ec.selectedEmail == nil {
+			ec.selectedPane = 0
+		}
+	case tcell.KeyUp:
+		if ec.selectedPane == 0 {
+			if ec.folderCursor > 0 {
+				ec.folderCursor--
+			}
+		} else if ec.selectedPane == 1 {
+			if ec.emailCursor > 0 {
+				ec.emailCursor--
+				ec.UpdateSelectedEmail()
+			}
+		} else if ec.selectedPane == 2 {
+			if ec.scrollOffset > 0 {
+				ec.scrollOffset--
+			}
+		}
+	case tcell.KeyDown:
+		if ec.selectedPane == 0 {
+			maxCursor := ec.GetFolderCount() - 1
+			if ec.folderCursor < maxCursor {
+				ec.folderCursor++
+			}
+		} else if ec.selectedPane == 1 {
+			if ec.selectedFolder != nil && ec.emailCursor < len(ec.selectedFolder.Emails)-1 {
+				ec.emailCursor++
+				ec.UpdateSelectedEmail()
+			}
+		} else if ec.selectedPane == 2 {
+			ec.scrollOffset++
+		}
+	case tcell.KeyEnter:
+		if ec.selectedPane == 0 {
+			ec.ToggleFolder()
+			ec.UpdateSelectedFolder()
+		} else if ec.selectedPane == 1 {
+			ec.UpdateSelectedEmail()
+		}
+	}
+}
+
+func (ec *EmailClient) GetFolderCount() int {
+	count := 0
+	var countFolders func(*Folder)
+	countFolders = func(f *Folder) {
+		count++
+		if f.Expanded {
+			for _, child := range f.Children {
+				countFolders(child)
+			}
+		}
+	}
+	countFolders(ec.folders)
+	return count
+}
+
+func (ec *EmailClient) ToggleFolder() {
+	idx := 0
+	var toggle func(*Folder) bool
+	toggle = func(f *Folder) bool {
+		if idx == ec.folderCursor {
+			f.Expanded = !f.Expanded
+			return true
+		}
+		idx++
+		if f.Expanded {
+			for _, child := range f.Children {
+				if toggle(child) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	toggle(ec.folders)
+}
+
+func (ec *EmailClient) UpdateSelectedFolder() {
+	idx := 0
+	var find func(*Folder) *Folder
+	find = func(f *Folder) *Folder {
+		if idx == ec.folderCursor {
+			return f
+		}
+		idx++
+		if f.Expanded {
+			for _, child := range f.Children {
+				if result := find(child); result != nil {
+					return result
+				}
+			}
+		}
+		return nil
+	}
+	folder := find(ec.folders)
+	if folder != nil && len(folder.Emails) > 0 {
+		ec.selectedFolder = folder
+		ec.emailCursor = 0
+		ec.UpdateSelectedEmail()
+	}
+}
+
+func (ec *EmailClient) UpdateSelectedEmail() {
+	if ec.selectedFolder != nil && ec.emailCursor < len(ec.selectedFolder.Emails) {
+		ec.selectedEmail = &ec.selectedFolder.Emails[ec.emailCursor]
+		ec.selectedEmail.Read = true
+		ec.scrollOffset = 0
+	}
+}
+
+func (ec *EmailClient) Draw() {
+	ec.screen.Clear()
+	width, height := ec.screen.Size()
+
+	// Define panel widths
+	leftWidth := width / 4
+	middleWidth := width / 2
+	rightWidth := width - leftWidth - middleWidth
+
+	// Draw borders
+	ec.DrawVerticalLine(leftWidth, 0, height)
+	ec.DrawVerticalLine(leftWidth+middleWidth, 0, height)
+
+	// Draw panels
+	ec.DrawFolderPanel(0, 0, leftWidth, height)
+	ec.DrawEmailList(leftWidth+1, 0, middleWidth, height)
+	ec.DrawEmailPreview(leftWidth+middleWidth+1, 0, rightWidth, height)
+
+	// Draw status bar
+	ec.DrawStatusBar(height - 1, width)
+
+	ec.screen.Show()
+}
+
+func (ec *EmailClient) DrawVerticalLine(x, y, height int) {
+	style := tcell.StyleDefault.Foreground(tcell.ColorGray)
+	for i := y; i < height-1; i++ {
+		ec.screen.SetContent(x, i, '│', nil, style)
+	}
+}
+
+func (ec *EmailClient) DrawFolderPanel(x, y, width, height int) {
+	style := tcell.StyleDefault
+	if ec.selectedPane == 0 {
+		style = style.Background(tcell.ColorDarkBlue)
+	}
+
+	// Draw title
+	title := " Folders "
+	ec.DrawText(x+1, y, width, title, style.Bold(true))
+
+	// Draw folder tree
+	row := y + 2
+	idx := 0
+	var drawFolder func(*Folder, int)
+	drawFolder = func(f *Folder, indent int) {
+		if row >= height-1 {
+			return
+		}
+
+		itemStyle := style
+		if idx == ec.folderCursor && ec.selectedPane == 0 {
+			itemStyle = itemStyle.Reverse(true)
+		}
+
+		prefix := ""
+		for i := 0; i < indent; i++ {
+			prefix += "  "
+		}
+
+		icon := "▸"
+		if f.Expanded {
+			icon = "▾"
+		}
+		if len(f.Children) == 0 {
+			icon = " "
+		}
+
+		text := fmt.Sprintf("%s%s %s", prefix, icon, f.Name)
+		if len(f.Emails) > 0 {
+			unread := 0
+			for _, email := range f.Emails {
+				if !email.Read {
+					unread++
+				}
+			}
+			if unread > 0 {
+				text += fmt.Sprintf(" (%d)", unread)
+			}
+		}
+
+		ec.DrawText(x+1, row, width-2, text, itemStyle)
+		row++
+		idx++
+
+		if f.Expanded {
+			for _, child := range f.Children {
+				drawFolder(child, indent+1)
+			}
+		}
+	}
+
+	drawFolder(ec.folders, 0)
+}
+
+func (ec *EmailClient) DrawEmailList(x, y, width, height int) {
+	style := tcell.StyleDefault
+	if ec.selectedPane == 1 {
+		style = style.Background(tcell.ColorDarkBlue)
+	}
+
+	// Draw title
+	title := " Emails "
+	if ec.selectedFolder != nil {
+		title = fmt.Sprintf(" %s ", ec.selectedFolder.Name)
+	}
+	ec.DrawText(x+1, y, width, title, style.Bold(true))
+
+	// Draw email list
+	row := y + 2
+	if ec.selectedFolder != nil {
+		for i, email := range ec.selectedFolder.Emails {
+			if row >= height-1 {
+				break
+			}
+
+			itemStyle := style
+			if i == ec.emailCursor && ec.selectedPane == 1 {
+				itemStyle = itemStyle.Reverse(true)
+			}
+			if !email.Read {
+				itemStyle = itemStyle.Bold(true)
+			}
+
+			// Format date
+			dateStr := email.Date.Format("Jan 02")
+			fromStr := email.From
+			if len(fromStr) > 20 {
+				fromStr = fromStr[:17] + "..."
+			}
+
+			line1 := fmt.Sprintf("%s %s", dateStr, fromStr)
+			ec.DrawText(x+1, row, width-2, line1, itemStyle)
+			row++
+
+			subjStyle := itemStyle
+			if !email.Read {
+				subjStyle = subjStyle.Foreground(tcell.ColorWhite)
+			}
+			subject := email.Subject
+			if len(subject) > width-4 {
+				subject = subject[:width-7] + "..."
+			}
+			ec.DrawText(x+1, row, width-2, subject, subjStyle)
+			row++
+			row++ // spacing
+		}
+	}
+}
+
+func (ec *EmailClient) DrawEmailPreview(x, y, width, height int) {
+	style := tcell.StyleDefault
+	if ec.selectedPane == 2 {
+		style = style.Background(tcell.ColorDarkBlue)
+	}
+
+	// Draw title
+	title := " Preview "
+	ec.DrawText(x+1, y, width, title, style.Bold(true))
+
+	if ec.selectedEmail == nil {
+		ec.DrawText(x+1, y+2, width, "No email selected", style.Foreground(tcell.ColorGray))
+		return
+	}
+
+	// Draw email details
+	row := y + 2
+	ec.DrawText(x+1, row, width-2, fmt.Sprintf("From: %s", ec.selectedEmail.From), style.Bold(true))
+	row++
+	ec.DrawText(x+1, row, width-2, fmt.Sprintf("Date: %s", ec.selectedEmail.Date.Format("Mon, Jan 02, 2006 15:04")), style)
+	row++
+	ec.DrawText(x+1, row, width-2, fmt.Sprintf("Subject: %s", ec.selectedEmail.Subject), style.Bold(true))
+	row += 2
+
+	// Draw separator
+	for i := 0; i < width-2; i++ {
+		ec.screen.SetContent(x+1+i, row, '─', nil, style.Foreground(tcell.ColorGray))
+	}
+	row += 2
+
+	// Draw body with scrolling
+	bodyLines := ec.WrapText(ec.selectedEmail.Body, width-4)
+	for i := ec.scrollOffset; i < len(bodyLines) && row < height-1; i++ {
+		ec.DrawText(x+1, row, width-2, bodyLines[i], style)
+		row++
+	}
+}
+
+func (ec *EmailClient) DrawStatusBar(y, width int) {
+	style := tcell.StyleDefault.Background(tcell.ColorGray).Foreground(tcell.ColorBlack)
+
+	// Clear line
+	for i := 0; i < width; i++ {
+		ec.screen.SetContent(i, y, ' ', nil, style)
+	}
+
+	status := " TAB: Switch Pane | ↑↓: Navigate | ENTER: Select/Expand | ESC: Quit "
+	ec.DrawText(0, y, width, status, style)
+}
+
+func (ec *EmailClient) DrawText(x, y, maxWidth int, text string, style tcell.Style) {
+	for i, r := range text {
+		if i >= maxWidth {
+			break
+		}
+		ec.screen.SetContent(x+i, y, r, nil, style)
+	}
+}
+
+func (ec *EmailClient) WrapText(text string, width int) []string {
+	var lines []string
+	currentLine := ""
+
+	for _, r := range text {
+		if r == '\n' {
+			lines = append(lines, currentLine)
+			currentLine = ""
+			continue
+		}
+
+		if len(currentLine) >= width {
+			lines = append(lines, currentLine)
+			currentLine = ""
+		}
+
+		currentLine += string(r)
+	}
+
+	if currentLine != "" {
+		lines = append(lines, currentLine)
+	}
+
+	return lines
+}
+
+func (ec *EmailClient) Close() {
+	ec.screen.Fini()
+}
+
+func main() {
+	client := NewEmailClient()
+	if err := client.Init(); err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	client.Run()
+}
