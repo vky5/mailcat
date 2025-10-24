@@ -10,4 +10,5 @@ type Email struct {
 	Body    string
 	Date    time.Time
 	Read    bool
+	Attachments string
 }
