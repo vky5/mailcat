@@ -1,8 +1,8 @@
 package ui
 
 import (
-	// "github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
+	// "github.com/gdamore/tcell/v2" // low level code 
+	"github.com/rivo/tview" // high level package for TUI
 )
 
 func StartUI(accounts []*Account) error {
