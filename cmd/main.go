@@ -4,19 +4,27 @@ import (
 	"time"
 
 	"github.com/vky5/mailcat/internal/db/models"
+	"github.com/vky5/mailcat/internal/logger"
 	"github.com/vky5/mailcat/internal/ui"
 )
 
 func main() {
+
+	// setting up logger
+	err := logger.Init("mailcat", false)
+	if err != nil {
+		panic(err)
+	}
+
 	// ===== Fake Data Setup =====
 	inboxEmails := []models.Email{
 		{
-			ID:      1,
-			From:    "alice@example.com",
-			Subject: "Meeting Reminder",
-			Body:    "Don't forget about our meeting at 3PM.",
-			Date:    time.Date(2025, 10, 24, 15, 0, 0, 0, time.Local),
-			Read:    false,
+			ID:          1,
+			From:        "alice@example.com",
+			Subject:     "Meeting Reminder",
+			Body:        "Don't forget about our meeting at 3PM.",
+			Date:        time.Date(2025, 10, 24, 15, 0, 0, 0, time.Local),
+			Read:        false,
 			Attachments: "fafsdfsdf",
 		},
 		{
@@ -34,7 +42,6 @@ func main() {
 			Body:    "Hey, want to grab lunch tomorrow?",
 			Date:    time.Date(2025, 10, 22, 12, 30, 0, 0, time.Local),
 			Read:    false,
-
 		},
 	}
 

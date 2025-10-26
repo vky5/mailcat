@@ -1,0 +1,204 @@
+[INFO] 2025/10/26 18:15:40 === CREATING CommandBar ===
+[INFO] 2025/10/26 18:15:40 === CommandBar CREATED (no DoneFunc set yet) ===
+[INFO] 2025/10/26 18:15:40 === REGISTERING Command:  !addaccount  ===
+[INFO] 2025/10/26 18:15:42 
+********** SetDoneFunc TRIGGERED **********
+[INFO] 2025/10/26 18:15:42 Key: %d (KeyEnter=%d, KeyCR=%d, KeyEsc=%d) 13 13 13 27
+[INFO] 2025/10/26 18:15:42 >>> ENTER key detected
+[INFO] 2025/10/26 18:15:42 >>> Input text before handling: '%s' fjdkl
+[INFO] 2025/10/26 18:15:42 >>> Calling handleInput DIRECTLY
+[INFO] 2025/10/26 18:15:42 
+╔═══════════════════════════════════════════════════════════╗
+[INFO] 2025/10/26 18:15:42 ║ handleInput CALLED with: ' fjdkl '
+[INFO] 2025/10/26 18:15:42 ║ Input length:  5
+[INFO] 2025/10/26 18:15:42 ║ Goroutine ID:  1
+[INFO] 2025/10/26 18:15:42 ║ nextFunc is nil:  true
+[INFO] 2025/10/26 18:15:42 ╚═══════════════════════════════════════════════════════════╝
+[INFO] 2025/10/26 18:15:42 >>> Step 0: Input after trimming: ' fjdkl ' (length:  5 )
+[INFO] 2025/10/26 18:15:42 >>> Step 1: About to clear input field via QueueUpdateDraw
+[INFO] 2025/10/26 18:17:35 === CREATING CommandBar ===
+[INFO] 2025/10/26 18:17:35 === CommandBar CREATED (no DoneFunc set yet) ===
+[INFO] 2025/10/26 18:17:35 === REGISTERING Command:  !addaccount  ===
+[INFO] 2025/10/26 18:17:37 
+********** SetDoneFunc TRIGGERED **********
+[INFO] 2025/10/26 18:17:37 Key: %d (KeyEnter=%d, KeyCR=%d, KeyEsc=%d) 13 13 13 27
+[INFO] 2025/10/26 18:17:37 >>> ENTER key detected
+[INFO] 2025/10/26 18:17:37 >>> Input text before handling: '%s' fjad
+[INFO] 2025/10/26 18:17:37 >>> Calling handleInput DIRECTLY
+[INFO] 2025/10/26 18:17:37 
+╔═══════════════════════════════════════════════════════════╗
+[INFO] 2025/10/26 18:17:37 ║ handleInput CALLED with: ' fjad '
+[INFO] 2025/10/26 18:17:37 ║ Input length:  4
+[INFO] 2025/10/26 18:17:37 ║ Goroutine ID:  1
+[INFO] 2025/10/26 18:17:37 ║ nextFunc is nil:  true
+[INFO] 2025/10/26 18:17:37 ╚═══════════════════════════════════════════════════════════╝
+[INFO] 2025/10/26 18:17:37 >>> Step 0: Input after trimming: ' fjad ' (length:  4 )
+[INFO] 2025/10/26 18:17:37 >>> Step 1: Clearing input field (DIRECT)
+[INFO] 2025/10/26 18:17:37 >>> Step 1: Input cleared
+[INFO] 2025/10/26 18:17:37 >>> Step 2b: No nextFunc - checking for registered command
+[INFO] 2025/10/26 18:17:37 >>> Step 3: Command NOT FOUND: ' fjad '
+[INFO] 2025/10/26 18:17:37 >>> ShowMessage called with: ' [red]Unknown command: fjad '
+[INFO] 2025/10/26 18:17:37     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:37 >>> ShowMessage DONE (direct manipulation)
+[INFO] 2025/10/26 18:17:37 >>> handleInput EXITING (normal path)
+
+[INFO] 2025/10/26 18:17:37 >>> handleInput completed
+[INFO] 2025/10/26 18:17:37 >>> Returning focus to lastFocus: %T &{0xc0001b4480 [0xc000128960 0xc000128990 0xc0001289c0 0xc0001289f0] 0 false {12896754943 4294967296 0 0 0  } {4294967298 4294967296 0 0 0  } {4294967307 4294967296 0 0 0  } {4294967311 12884927638 0 0 0  } false true true true true 0 0 <nil> <nil> <nil>}
+[INFO] 2025/10/26 18:17:37 >>> SetDoneFunc EXITING (Enter path)
+[INFO] 2025/10/26 18:17:37 ********** SetDoneFunc COMPLETED **********
+
+[INFO] 2025/10/26 18:17:39 
+********** SetDoneFunc TRIGGERED **********
+[INFO] 2025/10/26 18:17:39 Key: %d (KeyEnter=%d, KeyCR=%d, KeyEsc=%d) 13 13 13 27
+[INFO] 2025/10/26 18:17:39 >>> ENTER key detected
+[INFO] 2025/10/26 18:17:39 >>> Input text before handling: '%s' fjakldfa
+[INFO] 2025/10/26 18:17:39 >>> Calling handleInput DIRECTLY
+[INFO] 2025/10/26 18:17:39 
+╔═══════════════════════════════════════════════════════════╗
+[INFO] 2025/10/26 18:17:39 ║ handleInput CALLED with: ' fjakldfa '
+[INFO] 2025/10/26 18:17:39 ║ Input length:  8
+[INFO] 2025/10/26 18:17:39 ║ Goroutine ID:  1
+[INFO] 2025/10/26 18:17:39 ║ nextFunc is nil:  true
+[INFO] 2025/10/26 18:17:39 ╚═══════════════════════════════════════════════════════════╝
+[INFO] 2025/10/26 18:17:39 >>> Step 0: Input after trimming: ' fjakldfa ' (length:  8 )
+[INFO] 2025/10/26 18:17:39 >>> Step 1: Clearing input field (DIRECT)
+[INFO] 2025/10/26 18:17:39 >>> Step 1: Input cleared
+[INFO] 2025/10/26 18:17:39 >>> Step 2b: No nextFunc - checking for registered command
+[INFO] 2025/10/26 18:17:39 >>> Step 3: Command NOT FOUND: ' fjakldfa '
+[INFO] 2025/10/26 18:17:39 >>> ShowMessage called with: ' [red]Unknown command: fjakldfa '
+[INFO] 2025/10/26 18:17:39     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:39 >>> ShowMessage DONE (direct manipulation)
+[INFO] 2025/10/26 18:17:39 >>> handleInput EXITING (normal path)
+
+[INFO] 2025/10/26 18:17:39 >>> handleInput completed
+[INFO] 2025/10/26 18:17:39 >>> Returning focus to lastFocus: %T &{0xc0001b4480 [0xc000128960 0xc000128990 0xc0001289c0 0xc0001289f0] 0 false {12896754943 4294967296 0 0 0  } {4294967298 4294967296 0 0 0  } {4294967307 4294967296 0 0 0  } {4294967311 12884927638 0 0 0  } false true true true true 0 0 <nil> <nil> <nil>}
+[INFO] 2025/10/26 18:17:39 >>> SetDoneFunc EXITING (Enter path)
+[INFO] 2025/10/26 18:17:39 ********** SetDoneFunc COMPLETED **********
+
+[INFO] 2025/10/26 18:17:44 
+********** SetDoneFunc TRIGGERED **********
+[INFO] 2025/10/26 18:17:44 Key: %d (KeyEnter=%d, KeyCR=%d, KeyEsc=%d) 13 13 13 27
+[INFO] 2025/10/26 18:17:44 >>> ENTER key detected
+[INFO] 2025/10/26 18:17:44 >>> Input text before handling: '%s' !addaccount
+[INFO] 2025/10/26 18:17:44 >>> Calling handleInput DIRECTLY
+[INFO] 2025/10/26 18:17:44 
+╔═══════════════════════════════════════════════════════════╗
+[INFO] 2025/10/26 18:17:44 ║ handleInput CALLED with: ' !addaccount '
+[INFO] 2025/10/26 18:17:44 ║ Input length:  11
+[INFO] 2025/10/26 18:17:44 ║ Goroutine ID:  1
+[INFO] 2025/10/26 18:17:44 ║ nextFunc is nil:  true
+[INFO] 2025/10/26 18:17:44 ╚═══════════════════════════════════════════════════════════╝
+[INFO] 2025/10/26 18:17:44 >>> Step 0: Input after trimming: ' !addaccount ' (length:  11 )
+[INFO] 2025/10/26 18:17:44 >>> Step 1: Clearing input field (DIRECT)
+[INFO] 2025/10/26 18:17:44 >>> Step 1: Input cleared
+[INFO] 2025/10/26 18:17:44 >>> Step 2b: No nextFunc - checking for registered command
+[INFO] 2025/10/26 18:17:44 >>> Step 3: Command FOUND:  !addaccount
+[INFO] 2025/10/26 18:17:44 >>> Step 3: Calling ShowMessage
+[INFO] 2025/10/26 18:17:44 >>> ShowMessage called with: ' Running: Add a new email account '
+[INFO] 2025/10/26 18:17:44     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:44 >>> ShowMessage DONE (direct manipulation)
+[INFO] 2025/10/26 18:17:44 >>> Step 3: ShowMessage returned
+[INFO] 2025/10/26 18:17:44 >>> Step 4: Calling cmd.Execute DIRECTLY
+[INFO] 2025/10/26 18:17:44 !!!!! EXECUTE: !addaccount started !!!!!
+[INFO] 2025/10/26 18:17:44 !!!!! EXECUTE: Calling ShowPlaceholder
+[INFO] 2025/10/26 18:17:44 >>> ShowPlaceholder called with: ' Enter email: '
+[INFO] 2025/10/26 18:17:44     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:44 >>> ShowPlaceholder DONE (direct manipulation)
+[INFO] 2025/10/26 18:17:44 !!!!! EXECUTE: ShowPlaceholder returned
+[INFO] 2025/10/26 18:17:44 !!!!! EXECUTE: Calling SetNextFunc
+[INFO] 2025/10/26 18:17:44 >>> SetNextFunc called (nextFunc is now SET)
+[INFO] 2025/10/26 18:17:44     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:44 !!!!! EXECUTE: SetNextFunc returned
+[INFO] 2025/10/26 18:17:44 !!!!! EXECUTE: !addaccount completed !!!!!
+[INFO] 2025/10/26 18:17:44 >>> Step 4: cmd.Execute COMPLETED
+[INFO] 2025/10/26 18:17:44 >>> handleInput EXITING (normal path)
+
+[INFO] 2025/10/26 18:17:44 >>> handleInput completed
+[INFO] 2025/10/26 18:17:44 >>> NOT returning focus (in multi-step mode)
+[INFO] 2025/10/26 18:17:44 >>> SetDoneFunc EXITING (Enter path)
+[INFO] 2025/10/26 18:17:44 ********** SetDoneFunc COMPLETED **********
+
+[INFO] 2025/10/26 18:17:52 
+********** SetDoneFunc TRIGGERED **********
+[INFO] 2025/10/26 18:17:52 Key: %d (KeyEnter=%d, KeyCR=%d, KeyEsc=%d) 13 13 13 27
+[INFO] 2025/10/26 18:17:52 >>> ENTER key detected
+[INFO] 2025/10/26 18:17:52 >>> Input text before handling: '%s' vaibhavk05@proton.me
+[INFO] 2025/10/26 18:17:52 >>> Calling handleInput DIRECTLY
+[INFO] 2025/10/26 18:17:52 
+╔═══════════════════════════════════════════════════════════╗
+[INFO] 2025/10/26 18:17:52 ║ handleInput CALLED with: ' vaibhavk05@proton.me '
+[INFO] 2025/10/26 18:17:52 ║ Input length:  20
+[INFO] 2025/10/26 18:17:52 ║ Goroutine ID:  1
+[INFO] 2025/10/26 18:17:52 ║ nextFunc is nil:  false
+[INFO] 2025/10/26 18:17:52 ╚═══════════════════════════════════════════════════════════╝
+[INFO] 2025/10/26 18:17:52 >>> Step 0: Input after trimming: ' vaibhavk05@proton.me ' (length:  20 )
+[INFO] 2025/10/26 18:17:52 >>> Step 1: Clearing input field (DIRECT)
+[INFO] 2025/10/26 18:17:52 >>> Step 1: Input cleared
+[INFO] 2025/10/26 18:17:52 >>> Step 2a: nextFunc EXISTS - running multi-step handler
+[INFO] 2025/10/26 18:17:52 >>> Step 2a: nextFunc cleared (set to nil)
+[INFO] 2025/10/26 18:17:52 >>> Step 2a: Calling nextFunc DIRECTLY
+[INFO] 2025/10/26 18:17:52 !!!!! NEXTFUNC (email): Called with ' vaibhavk05@proton.me '
+[INFO] 2025/10/26 18:17:52 >>> ShowPlaceholder called with: ' Enter password: '
+[INFO] 2025/10/26 18:17:52     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:52 >>> ShowPlaceholder DONE (direct manipulation)
+[INFO] 2025/10/26 18:17:52 !!!!! NEXTFUNC (email): ShowPlaceholder returned
+[INFO] 2025/10/26 18:17:52 >>> SetNextFunc called (nextFunc is now SET)
+[INFO] 2025/10/26 18:17:52     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:52 !!!!! NEXTFUNC (email): SetNextFunc for password set
+[INFO] 2025/10/26 18:17:52 >>> Step 2a: nextFunc callback COMPLETED
+[INFO] 2025/10/26 18:17:52 >>> handleInput EXITING (multi-step path)
+
+[INFO] 2025/10/26 18:17:52 >>> handleInput completed
+[INFO] 2025/10/26 18:17:52 >>> NOT returning focus (in multi-step mode)
+[INFO] 2025/10/26 18:17:52 >>> SetDoneFunc EXITING (Enter path)
+[INFO] 2025/10/26 18:17:52 ********** SetDoneFunc COMPLETED **********
+
+[INFO] 2025/10/26 18:17:59 
+********** SetDoneFunc TRIGGERED **********
+[INFO] 2025/10/26 18:17:59 Key: %d (KeyEnter=%d, KeyCR=%d, KeyEsc=%d) 13 13 13 27
+[INFO] 2025/10/26 18:17:59 >>> ENTER key detected
+[INFO] 2025/10/26 18:17:59 >>> Input text before handling: '%s' fkjlasdjfaklsdf
+[INFO] 2025/10/26 18:17:59 >>> Calling handleInput DIRECTLY
+[INFO] 2025/10/26 18:17:59 
+╔═══════════════════════════════════════════════════════════╗
+[INFO] 2025/10/26 18:17:59 ║ handleInput CALLED with: ' fkjlasdjfaklsdf '
+[INFO] 2025/10/26 18:17:59 ║ Input length:  15
+[INFO] 2025/10/26 18:17:59 ║ Goroutine ID:  1
+[INFO] 2025/10/26 18:17:59 ║ nextFunc is nil:  false
+[INFO] 2025/10/26 18:17:59 ╚═══════════════════════════════════════════════════════════╝
+[INFO] 2025/10/26 18:17:59 >>> Step 0: Input after trimming: ' fkjlasdjfaklsdf ' (length:  15 )
+[INFO] 2025/10/26 18:17:59 >>> Step 1: Clearing input field (DIRECT)
+[INFO] 2025/10/26 18:17:59 >>> Step 1: Input cleared
+[INFO] 2025/10/26 18:17:59 >>> Step 2a: nextFunc EXISTS - running multi-step handler
+[INFO] 2025/10/26 18:17:59 >>> Step 2a: nextFunc cleared (set to nil)
+[INFO] 2025/10/26 18:17:59 >>> Step 2a: Calling nextFunc DIRECTLY
+[INFO] 2025/10/26 18:17:59 !!!!! NEXTFUNC (password): Called with ' fkjlasdjfaklsdf '
+[INFO] 2025/10/26 18:17:59 >>> ShowMessage called with: ' Account added: vaibhavk05@proton.me '
+[INFO] 2025/10/26 18:17:59     Goroutine ID:  1
+[INFO] 2025/10/26 18:17:59 >>> ShowMessage DONE (direct manipulation)
+[INFO] 2025/10/26 18:17:59 !!!!! NEXTFUNC (password): COMPLETED
+[INFO] 2025/10/26 18:17:59 >>> Step 2a: nextFunc callback COMPLETED
+[INFO] 2025/10/26 18:17:59 >>> handleInput EXITING (multi-step path)
+
+[INFO] 2025/10/26 18:17:59 >>> handleInput completed
+[INFO] 2025/10/26 18:17:59 >>> Returning focus to lastFocus: %T &{0xc0001b4480 [0xc000128960 0xc000128990 0xc0001289c0 0xc0001289f0] 0 false {12896754943 4294967296 0 0 0  } {4294967298 4294967296 0 0 0  } {4294967307 4294967296 0 0 0  } {4294967311 12884927638 0 0 0  } false true true true true 0 0 <nil> <nil> <nil>}
+[INFO] 2025/10/26 18:17:59 >>> SetDoneFunc EXITING (Enter path)
+[INFO] 2025/10/26 18:17:59 ********** SetDoneFunc COMPLETED **********
+
+[INFO] 2025/10/26 18:40:59 === Creating CommandBar ===
+[INFO] 2025/10/26 18:40:59 Registering command:  !addaccount
+[INFO] 2025/10/26 18:41:01 
+********** SetDoneFunc TRIGGERED **********
+[INFO] 2025/10/26 18:41:01 Key: %d (KeyEnter=%d, KeyCR=%d, KeyEsc=%d) 13 13 13 27
+[INFO] 2025/10/26 18:41:01 >>> ENTER key detected
+[INFO] 2025/10/26 18:41:01 >>> Input text before handling: '%s' fasjdfa
+[INFO] 2025/10/26 18:41:01 >>> Calling handleInput DIRECTLY
+[WARN] 2025/10/26 18:41:01 Unknown command input: fasjdfa
+[INFO] 2025/10/26 18:41:01 >>> handleInput completed
+[INFO] 2025/10/26 18:41:01 >>> Returning focus to lastFocus: %T &{0xc0002a6360 [0xc0002842d0 0xc000284300 0xc000284330 0xc000284360] 0 false {12896754943 4294967296 0 0 0  } {4294967298 4294967296 0 0 0  } {4294967307 4294967296 0 0 0  } {4294967311 12884927638 0 0 0  } false true true true true 0 0 <nil> <nil> <nil>}
+[INFO] 2025/10/26 18:41:01 >>> SetDoneFunc EXITING (Enter path)
+[INFO] 2025/10/26 18:41:01 ********** SetDoneFunc COMPLETED **********
+
+[INFO] 2025/10/26 18:41:25 === Creating CommandBar ===
+[INFO] 2025/10/26 18:41:25 Registering command:  !addaccount
+[INFO] 2025/10/26 18:41:37 ESC pressed - returning focus to last panel
