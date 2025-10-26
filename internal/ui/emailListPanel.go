@@ -28,8 +28,8 @@ func NewEmailListPanel(onSelect func(email models.Email)) *EmailListPanel {
 	// Table styling with gradient-like background
 	el.table.SetBorder(true).
 		SetTitle(" 📬 Emails ").
-		SetBorderColor(tcell.NewRGBColor(0, 191, 255)).
-		SetBackgroundColor(tcell.NewRGBColor(18, 30, 40))
+		// SetBorderColor(tcell.NewRGBColor(0, 191, 255)).
+		SetBackgroundColor(tcell.NewRGBColor(18, 30, 40)).SetBorderAttributes(tcell.AttrDim)
 
 	el.table.SetSelectable(true, false)
 	el.table.SetFixed(0, 2) // 2 columns for subject + date
@@ -56,6 +56,13 @@ func NewEmailListPanel(onSelect func(email models.Email)) *EmailListPanel {
 	// Redraw on focus/blur for clean highlighting
 	el.table.SetBlurFunc(func() { el.render() })
 	el.table.SetFocusFunc(func() { el.render() })
+
+	el.table.SetFocusFunc(func() {
+		el.table.SetBorderColor(tcell.NewRGBColor(0, 191, 255))
+	})
+	el.table.SetBlurFunc(func() {
+		el.table.SetBorderColor(tcell.ColorNone).SetBorderAttributes(tcell.AttrDim)
+	})
 
 	return el
 }

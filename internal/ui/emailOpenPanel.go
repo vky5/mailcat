@@ -28,12 +28,18 @@ func NewEmailOpenPanel() *EmailOpenPanel {
 		SetScrollable(true).
 		SetBorder(true).
 		SetTitle(" 📧 Email Content ").
-		SetBorderColor(tcell.NewRGBColor(0, 191, 255)). // bright cyan
-		SetBackgroundColor(tcell.NewRGBColor(18, 30, 40))
+		SetBackgroundColor(tcell.NewRGBColor(18, 30, 40)).SetBorderAttributes(tcell.AttrDim)
 
 	ep.textView.SetTextColor(tcell.NewRGBColor(200, 200, 200))
 
 	ep.showPlaceholder()
+
+	ep.textView.SetFocusFunc(func() {
+		ep.textView.SetBorderColor(tcell.NewRGBColor(0, 191, 255))
+	})
+	ep.textView.SetBlurFunc(func() {
+		ep.textView.SetBorderColor(tcell.ColorNone).SetBorderAttributes(tcell.AttrDim)
+	})
 
 	return ep
 }
@@ -43,10 +49,13 @@ func (ep *EmailOpenPanel) showPlaceholder() {
 	placeholder := `
 
 
-                          [#00BFFF::b]📬 No Email Selected[-:-:-]
+                          			[#00BFFF::b]📬 No Email Selected[-:-:-]
 
-                    [#B0B0B0]Select an email from the list
-                    to view its content here[-]
+
+
+
+
+                    [#B0B0B0]Select an email from the list to view its content here[-]
 
 
 `
@@ -129,7 +138,6 @@ func (ep *EmailOpenPanel) render() {
 	ep.textView.SetText(content.String())
 	ep.textView.ScrollToBeginning()
 }
-
 
 // Clear resets the panel to placeholder state
 func (ep *EmailOpenPanel) Clear() {

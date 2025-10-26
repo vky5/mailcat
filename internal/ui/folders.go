@@ -68,13 +68,21 @@ func NewFolderPanel(onSelect func(account string, folder string)) *FolderPanel {
 	}
 
 	fp.list.SetBorder(true).SetTitle(" 📂 Accounts ")
-	fp.list.SetBorderColor(tcell.NewRGBColor(0, 191, 255))    // bright cyan to match email panel
+	// fp.list.SetBorderColor(tcell.NewRGBColor(0, 191, 255))    // bright cyan to match email panel
+	fp.list.SetBorderAttributes(tcell.AttrDim)
 	fp.list.SetBackgroundColor(tcell.NewRGBColor(18, 30, 40)) // dark background
 	fp.list.ShowSecondaryText(false)
 	fp.list.SetHighlightFullLine(true)
 	fp.list.SetMainTextColor(tcell.NewRGBColor(180, 220, 255))         // soft cyan for text
 	fp.list.SetSelectedBackgroundColor(tcell.NewRGBColor(0, 100, 150)) // match email panel selection
 	fp.list.SetSelectedTextColor(tcell.ColorWhite)
+
+	fp.list.SetFocusFunc(func() {
+		fp.list.SetBorderColor(tcell.NewRGBColor(0, 191, 255)) // bright cyan on focus
+	})
+	fp.list.SetBlurFunc(func() {
+		fp.list.SetBorderColor(tcell.ColorNone).SetBorderAttributes(tcell.AttrDim) // remove highlight on blur
+	})
 
 	return fp
 }
@@ -139,11 +147,11 @@ func (fp *FolderPanel) render() {
 
 				unread := f.UnreadCount()
 				folderIcon := getFolderIcon(f.Name)
-				
+
 				// Base folder color
 				folderColor := "#B0B0B0" // gray for read
 				folderStyle := ""
-				
+
 				// Highlight if unread
 				if unread > 0 {
 					folderColor = "#FFD700" // gold for unread
@@ -158,11 +166,11 @@ func (fp *FolderPanel) render() {
 					unreadText = fmt.Sprintf(" [#778899](%d)[-]", unread)
 				}
 
-				folderText := fmt.Sprintf("  [#4682B4]%s[-] [%s%s]%s %s[-:-:-]%s", 
-					line, 
-					folderColor, 
+				folderText := fmt.Sprintf("  [#4682B4]%s[-] [%s%s]%s %s[-:-:-]%s",
+					line,
+					folderColor,
 					folderStyle,
-					folderIcon, 
+					folderIcon,
 					f.Name,
 					unreadText,
 				)
@@ -179,7 +187,7 @@ func (fp *FolderPanel) render() {
 					fp.list.AddItem(connectorText, "", 0, nil)
 				}
 			}
-			
+
 			// Add separator after expanded account (non-selectable)
 			if accIdx < len(fp.accounts)-1 {
 				fp.list.AddItem("[#2F4F4F]────────────────────────[-]", "", 0, nil)
