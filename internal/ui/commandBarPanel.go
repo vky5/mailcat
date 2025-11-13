@@ -58,7 +58,6 @@ func (cb *CommandBar) ShowMessage(msg string) {
 }
 
 // --- Main FSM handler ---
-
 func (cb *CommandBar) handleInput(input string) {
 	input = strings.TrimSpace(input)
 	cb.input.SetText("")

@@ -49,6 +49,7 @@ func StartUI(accounts []*Account) error {
 	// registering commands
 	helpCmd := commands.NewHelpCommand(cmdBar.registry)
 	cmdBar.Register(helpCmd)
+	cmdBar.Register(&commands.AddAccount{})
 
 	// ===== Layout =====
 	mainLayout := tview.NewFlex().SetDirection(tview.FlexRow)
