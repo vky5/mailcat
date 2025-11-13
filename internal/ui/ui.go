@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"github.com/vky5/mailcat/internal/commands"
 	"github.com/vky5/mailcat/internal/db/models"
 	"github.com/vky5/mailcat/internal/logger"
 )
@@ -45,26 +46,9 @@ func StartUI(accounts []*Account) error {
 	// ===== Command Bar =====
 	cmdBar := NewCommandBar(app)
 
-	// Example command: add account
-	cmdBar.RegisterCommand(&Command{
-		Name:        "!addaccount",
-		Description: "Add a new email account",
-		Placeholder: "Enter your email address",
-		Execute: func(_ string, cb *CommandBar) {
-			logger.Info("Executing !addaccount")
-			cb.ShowPlaceholder("Enter email:")
-
-			cb.SetNextFunc(func(email string) {
-				logger.Info("Email entered: ", email)
-				cb.ShowPlaceholder("Enter password:")
-
-				cb.SetNextFunc(func(pass string) {
-					logger.Info("Password entered")
-					cb.ShowMessage("Account added: " + email)
-				})
-			})
-		},
-	})
+	// registering commands
+	helpCmd := commands.NewHelpCommand(cmdBar.registry)
+	cmdBar.Register(helpCmd)
 
 	// ===== Layout =====
 	mainLayout := tview.NewFlex().SetDirection(tview.FlexRow)
@@ -124,17 +108,15 @@ func StartUI(accounts []*Account) error {
 			logger.Info("Command entered: ", input)
 			cmdBar.handleInput(input)
 
-			if cmdBar.nextFunc == nil {
+			// If no active command is running, restore focus
+			if cmdBar.active == nil {
 				app.SetFocus(lastFocus)
-				logger.Info("Returning focus to last focused panel")
 			}
 
 		case tcell.KeyEsc:
 			cmdBar.input.SetText("")
 			cmdBar.ShowMessage("Type !help for commands")
 			app.SetFocus(lastFocus)
-			logger.Info("ESC pressed - returning focus to last panel")
-
 		}
 	})
 

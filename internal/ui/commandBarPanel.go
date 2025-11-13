@@ -6,32 +6,23 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/vky5/mailcat/internal/logger"
+	"github.com/vky5/mailcat/internal/commands"
 )
 
-// Command represents a single executable command in the bar.
-type Command struct {
-	Name        string
-	Description string
-	Placeholder string
-	Execute     func(input string, cb *CommandBar)
-}
-
-// CommandBar manages the input field, display area, and registry of commands.
 type CommandBar struct {
 	box      *tview.Flex
 	input    *tview.InputField
 	hintText *tview.TextView
-	commands map[string]*Command
-	nextFunc func(string)
+	registry map[string]commands.Command
+	active   commands.Command
 	app      *tview.Application
 }
 
 // NewCommandBar creates and returns a new CommandBar component.
 func NewCommandBar(app *tview.Application) *CommandBar {
-	logger.Info("=== Creating CommandBar ===")
 	cb := &CommandBar{
 		app:      app,
-		commands: make(map[string]*Command),
+		registry: make(map[string]commands.Command),
 	}
 
 	cb.input = tview.NewInputField().
@@ -52,53 +43,49 @@ func NewCommandBar(app *tview.Application) *CommandBar {
 	return cb
 }
 
-// RegisterCommand adds a new command to the registry.
-func (cb *CommandBar) RegisterCommand(cmd *Command) {
-	logger.Info("Registering command: ", cmd.Name)
-	cb.commands[cmd.Name] = cmd
+// Register adds a new command to the registry.
+func (cb *CommandBar) Register(cmd commands.Command) {
+	cb.registry[cmd.Name()] = cmd
 }
 
-// ShowPlaceholder updates the placeholder for next input.
-func (cb *CommandBar) ShowPlaceholder(text string) {
-	cb.input.SetPlaceholder(text)
-	cb.input.SetText("")
+// Context Interface implementation
+func (cb *CommandBar) ShowPlaceholder(msg string) {
+	cb.input.SetPlaceholder(msg)
 }
 
-// SetNextFunc sets the function to run after next Enter press.
-func (cb *CommandBar) SetNextFunc(f func(string)) {
-	cb.nextFunc = f
-}
-
-// ShowMessage displays a hint or output text.
 func (cb *CommandBar) ShowMessage(msg string) {
 	cb.hintText.SetText(msg)
 }
 
-// handleInput processes user input and triggers commands.
+// --- Main FSM handler ---
+
 func (cb *CommandBar) handleInput(input string) {
 	input = strings.TrimSpace(input)
 	cb.input.SetText("")
 
-	// Multi-step command flow
-	if cb.nextFunc != nil {
-		next := cb.nextFunc
-		cb.nextFunc = nil
-		next(input)
+	// If a command is already active...
+	if cb.active != nil {
+		done := cb.active.HandleInput(input, cb)
+		if done {
+			cb.active = nil
+		}
 		return
 	}
 
-	// Execute registered commands
-	if cmd, ok := cb.commands[input]; ok {
-		cb.ShowMessage("Running: " + cmd.Description)
-		cmd.Execute(input, cb)
-	} else {
+	// Start new command
+	cmd, ok := cb.registry[input]
+	if !ok {
 		cb.ShowMessage("[red]Unknown command: " + input)
 		logger.Warn("Unknown command input: " + input)
+		return
 	}
+
+	cb.active = cmd
+	cb.ShowMessage("Running: " + cmd.Description())
+	cmd.Begin(cb)
 }
 
 // GetPrimitive returns the root Flex to add into layouts.
 func (cb *CommandBar) GetPrimitive() tview.Primitive {
 	return cb.box
 }
-
