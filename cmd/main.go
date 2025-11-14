@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/vky5/mailcat/internal/db"
 	"github.com/vky5/mailcat/internal/db/models"
 	"github.com/vky5/mailcat/internal/logger"
 	"github.com/vky5/mailcat/internal/ui"
@@ -11,10 +12,12 @@ import (
 func main() {
 
 	// setting up logger
-	err := logger.Init("mailcat", false)
+	err := logger.Init("mailcat.log", false)
 	if err != nil {
 		panic(err)
 	}
+
+	db.InitDB()
 
 	// ===== Fake Data Setup =====
 	inboxEmails := []models.Email{
