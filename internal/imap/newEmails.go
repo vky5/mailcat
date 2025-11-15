@@ -44,7 +44,7 @@ func ListenNewEmails(conn *client.Client, mailbox string, out chan models.Email)
 
 				from := mbox.Messages + 1
 				to := mboxUpdate.Mailbox.Messages
-				emails, err := FetchEmails(conn, int(to-from+1), 1)
+				emails, err := FetchEmails(conn, "INBOX",int(to-from+1), 1)
 				if err != nil {
 					log.Printf("Error fetching new emails: %v", err)
 				} else {

@@ -70,7 +70,7 @@ func streamMails(c *gin.Context) {
 	}
 	defer imap.Logout(conn)
 
-	emails, err := imap.FetchEmails(conn, req.PageSize, req.PageNumber)
+	emails, err := imap.FetchEmails(conn,"INBOX", req.PageSize, req.PageNumber)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

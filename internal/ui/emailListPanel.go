@@ -7,6 +7,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/vky5/mailcat/internal/db/models"
+	"github.com/vky5/mailcat/internal/logger"
 )
 
 // EmailListPanel displays emails for a folder/account.
@@ -19,6 +20,7 @@ type EmailListPanel struct {
 
 // NewEmailListPanel creates a styled table for email list.
 func NewEmailListPanel(onSelect func(email models.Email)) *EmailListPanel {
+	logger.Info("NewEmailListPanel: Creating new email list panel")
 	el := &EmailListPanel{
 		table:    tview.NewTable(),
 		onSelect: onSelect,
@@ -44,26 +46,33 @@ func NewEmailListPanel(onSelect func(email models.Email)) *EmailListPanel {
 
 	// Only subject rows trigger selection
 	el.table.SetSelectedFunc(func(row, col int) {
+		logger.Info("EmailListPanel: Row selected:", row, "col:", col)
+		// row 1,5,9... are subject rows (we render 4 rows per email)
 		if row%4 != 1 {
+			logger.Info("EmailListPanel: Non-subject row clicked, ignoring")
 			return
 		}
 		idx := (row - 1) / 4
+		logger.Info("EmailListPanel: Calculated email index:", idx)
 		if idx >= 0 && idx < len(el.emails) && el.onSelect != nil {
+			logger.Info("EmailListPanel: Calling onSelect for email:", el.emails[idx].Subject)
 			el.onSelect(el.emails[idx])
+		} else {
+			logger.Info("EmailListPanel: Invalid index or no emails")
 		}
 	})
 
-	// Redraw on focus/blur for clean highlighting
-	el.table.SetBlurFunc(func() { el.render() })
-	el.table.SetFocusFunc(func() { el.render() })
-
+	// Single set of focus/blur handlers - just border color, no re-rendering
 	el.table.SetFocusFunc(func() {
+		logger.Info("EmailListPanel: Setting focus border color")
 		el.table.SetBorderColor(tcell.NewRGBColor(0, 191, 255))
 	})
 	el.table.SetBlurFunc(func() {
+		logger.Info("EmailListPanel: Removing focus border color")
 		el.table.SetBorderColor(tcell.ColorNone).SetBorderAttributes(tcell.AttrDim)
 	})
 
+	logger.Info("NewEmailListPanel: Email list panel created successfully")
 	return el
 }
 
@@ -99,25 +108,47 @@ func getPreviewText(body string, maxLen int) string {
 
 // SetEmails updates emails and re-renders
 func (el *EmailListPanel) SetEmails(emails []models.Email) {
+	logger.Info("SetEmails: Called with", len(emails), "emails")
 	el.emails = emails
+	logger.Info("SetEmails: Calling render()")
 	el.render()
+
+	// After rendering, always move selection to the first subject row (if present).
+	// This avoids being stuck on a non-selectable cell or an out-of-range index.
+	rowCount := el.table.GetRowCount()
+	logger.Info("SetEmails: Table has", rowCount, "rows after render")
+	if rowCount > 1 {
+		// first subject row is 1 (we render starting from row=1)
+		// guard: ensure we don't select an invalid row
+		logger.Info("SetEmails: Selecting row 1")
+		el.table.Select(1, 0)
+	} else {
+		logger.Info("SetEmails: Not enough rows to select")
+	}
+	logger.Info("SetEmails: Completed successfully")
 }
 
 // render displays emails with rich formatting
 func (el *EmailListPanel) render() {
+	logger.Info("render: Starting render with", len(el.emails), "emails")
 	el.table.Clear()
+	logger.Info("render: Table cleared")
 
 	if len(el.emails) == 0 {
+		logger.Info("render: No emails, showing empty state")
 		cell := tview.NewTableCell("[::b][#00BFFF]📭 No Emails[-:-:-]").
 			SetAlign(tview.AlignCenter).
 			SetSelectable(false).
 			SetBackgroundColor(tcell.NewRGBColor(18, 30, 40))
 		el.table.SetCell(2, 0, cell)
+		logger.Info("render: Empty state cell added")
 		return
 	}
 
+	logger.Info("render: Rendering", len(el.emails), "emails")
 	row := 1
 	for i, e := range el.emails {
+		logger.Info("render: Processing email", i, "-", e.Subject)
 		bgColor := tcell.NewRGBColor(18, 30, 40)
 		if i%2 == 0 {
 			bgColor = tcell.NewRGBColor(22, 35, 48)
@@ -207,16 +238,46 @@ func (el *EmailListPanel) render() {
 		el.table.SetCell(row+3, 1, tview.NewTableCell("").SetBackgroundColor(bgColor).SetSelectable(false))
 
 		row += 4
+		logger.Info("render: Email", i, "rendered, next row:", row)
 	}
 
 	// Ensure first email subject is selected initially
 	r, c := el.table.GetSelection()
+	logger.Info("render: Current selection - row:", r, "col:", c)
 	if el.table.GetRowCount() > 1 && r == 0 && c == 0 {
+		logger.Info("render: Selecting first subject row (row 1)")
 		el.table.Select(1, 0)
 	}
+	logger.Info("render: Render completed")
 }
 
 // Primitive returns the tview primitive
 func (el *EmailListPanel) Primitive() tview.Primitive {
 	return el.table
+}
+
+
+// SetLoading shows a temporary loading spinner instead of emails
+func (el *EmailListPanel) SetLoading(loader tview.Primitive) {
+	logger.Info("SetLoading: Setting loading state")
+	el.table.Clear()
+	el.table.SetCell(0, 0, tview.NewTableCell("").SetSelectable(false))
+	el.table.SetCell(1, 0, tview.NewTableCell("").SetSelectable(false))
+	el.table.SetCell(2, 0, tview.NewTableCell("").SetSelectable(false))
+
+	// Center loader
+	cell := tview.NewTableCell("").
+		SetSelectable(false).
+		SetAlign(tview.AlignCenter)
+	el.table.SetCell(3, 0, cell)
+
+	// Insert loader widget
+	el.table.SetCell(4, 0,
+		tview.NewTableCell("").
+			SetSelectable(false).
+			SetExpansion(1).
+			SetAlign(tview.AlignCenter).
+			SetReference(loader),
+	)
+	logger.Info("SetLoading: Loading state set successfully")
 }

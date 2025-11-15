@@ -2,7 +2,6 @@ package imap
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
@@ -11,17 +10,15 @@ import (
 )
 
 // fetch emails
-func FetchEmails(conn *client.Client, pageSize int, pageNumber int) ([]models.Email, error) {
+func FetchEmails(conn *client.Client, mailbox string ,pageSize int, pageNumber int) ([]models.Email, error) {
 	// select INBOX
-	mbox, err := conn.Select("INBOX", false)
+	mbox, err := conn.Select(mailbox, false)
 	if err != nil {
-		return nil, fmt.Errorf("failed to select INBOX: %v", err)
+		return nil, fmt.Errorf("failed to select %s: %v", mailbox, err)
 	}
-
-	if mbox.Messages == 0 { // this means that there are 0 emails in INBOX
-		log.Println("No messages found in INBOX")
-		return nil, nil
-	}
+   if mbox.Messages == 0 {
+        return []models.Email{}, nil
+    }
 
 	from, to := utils.Paginate(int(mbox.Messages), pageSize, pageNumber) // we get the from and to values of the emails to be fetched
 
@@ -49,8 +46,8 @@ func FetchEmails(conn *client.Client, pageSize int, pageNumber int) ([]models.Em
 		*/
 		emails = parseMails(msg, emails)
 	}
-	// IMAP Server → conn.Fetch() → messages channel → for loop
 
+	// IMAP Server → conn.Fetch() → messages channel → for loop
 	if err := <-done; err != nil {
 		return nil, fmt.Errorf("failed to fetch emails: %v", err)
 	}

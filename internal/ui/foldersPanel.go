@@ -15,6 +15,7 @@ type Folder struct {
 
 // Account is emails
 type Account struct {
+	ID       uint
 	Email    string
 	Folders  []Folder
 	Expanded bool // shows whether we show the folders or not
@@ -99,6 +100,17 @@ func (fp *FolderPanel) AddAccount(email string, folders []Folder) {
 	fp.render()
 }
 
+// UpdateAccount updates the folders for an existing account
+func (fp *FolderPanel) UpdateAccount(email string, folders []Folder) {
+	for _, acc := range fp.accounts {
+		if acc.Email == email {
+			acc.Folders = folders
+			fp.render()
+			return
+		}
+	}
+}
+
 // refresh the panel with new emails or updates
 func (fp *FolderPanel) render() {
 	fp.list.Clear()
@@ -111,7 +123,7 @@ func (fp *FolderPanel) render() {
 	// Add separator (non-selectable)
 	fp.list.AddItem("[#2F4F4F]────────────────────────[-]", "", 0, nil)
 
-	for accIdx, acc := range fp.accounts {
+	for _, acc := range fp.accounts {
 		// Top-level account with email icon and better styling
 		totalUnread := 0
 		for _, f := range acc.Folders {
@@ -139,10 +151,8 @@ func (fp *FolderPanel) render() {
 			// Folder children with better icons and styling
 			for i, f := range acc.Folders {
 				line := "├──"
-				connector := "│"
 				if i == len(acc.Folders)-1 {
 					line = "└──"
-					connector = " "
 				}
 
 				unread := f.UnreadCount()
@@ -180,17 +190,6 @@ func (fp *FolderPanel) render() {
 				fp.list.AddItem(folderText, "", 0, func() {
 					fp.onSelect(accountEmail, folder.Name)
 				})
-
-				// Add subtle connector line between folders (non-selectable)
-				if i < len(acc.Folders)-1 {
-					connectorText := fmt.Sprintf("  [#4682B4]%s[-]", connector)
-					fp.list.AddItem(connectorText, "", 0, nil)
-				}
-			}
-
-			// Add separator after expanded account (non-selectable)
-			if accIdx < len(fp.accounts)-1 {
-				fp.list.AddItem("[#2F4F4F]────────────────────────[-]", "", 0, nil)
 			}
 		}
 	}
