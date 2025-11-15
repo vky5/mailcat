@@ -91,9 +91,8 @@ func (ep *EmailOpenPanel) render() {
 	content.WriteString(fmt.Sprintf("[#87CEEB::b]From:[-:-:-] [#B0C4DE]%s[-]\n", ep.email.From))
 
 	// To field
-	if len(ep.email.To) > 0 {
-		toAddresses := strings.Join(ep.email.To, ", ")
-		content.WriteString(fmt.Sprintf("[#87CEEB::b]To:[-:-:-]   [#B0C4DE]%s[-]\n", toAddresses))
+	if strings.TrimSpace(ep.email.To) != "" {
+		content.WriteString(fmt.Sprintf("[#87CEEB::b]To:[-:-:-]   [#B0C4DE]%s[-]\n", ep.email.To))
 	}
 
 	// Date field
