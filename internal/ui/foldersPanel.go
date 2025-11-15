@@ -23,9 +23,10 @@ type Account struct {
 
 // struct that connects data to UI
 type FolderPanel struct {
-	list     *tview.List                  // actual visual component
-	accounts []*Account                   // our data model
-	onSelect func(account, folder string) // callback when a folder is selected
+	list         *tview.List                  // actual visual component
+	accounts     []*Account                   // our data model
+	onSelect     func(account, folder string) // callback when a folder is selected
+	onAddAccount func()                       // callback when add account is selected
 }
 
 // get unread emails count
@@ -62,10 +63,11 @@ func getFolderIcon(folderName string) string {
 }
 
 // describing the basic layout of the panel returning the folder panel
-func NewFolderPanel(onSelect func(account string, folder string)) *FolderPanel {
+func NewFolderPanel(onSelect func(account string, folder string), onAddAccount func()) *FolderPanel {
 	fp := &FolderPanel{
-		list:     tview.NewList(),
-		onSelect: onSelect,
+		list:         tview.NewList(),
+		onSelect:     onSelect,
+		onAddAccount: onAddAccount,
 	}
 
 	fp.list.SetBorder(true).SetTitle(" 📂 Accounts ")
@@ -117,7 +119,9 @@ func (fp *FolderPanel) render() {
 
 	// Add New Account with vibrant styling
 	fp.list.AddItem("[::b][#32CD32]✨ Add New Account[-:-:-]", "", 0, func() {
-		fmt.Println("Add account clicked")
+		if fp.onAddAccount != nil {
+			fp.onAddAccount()
+		}
 	})
 
 	// Add separator (non-selectable)

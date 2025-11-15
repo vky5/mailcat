@@ -5,8 +5,8 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"github.com/vky5/mailcat/internal/logger"
 	"github.com/vky5/mailcat/internal/commands"
+	"github.com/vky5/mailcat/internal/logger"
 )
 
 type CommandBar struct {
@@ -20,25 +20,39 @@ type CommandBar struct {
 
 // NewCommandBar creates and returns a new CommandBar component.
 func NewCommandBar(app *tview.Application) *CommandBar {
+	blue := tcell.NewRGBColor(0, 102, 204) // input box blue
+
 	cb := &CommandBar{
 		app:      app,
 		registry: make(map[string]commands.Command),
 	}
 
+	// INPUT FIELD (blue background)
 	cb.input = tview.NewInputField().
 		SetLabel("cmd> ").
-		SetFieldBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
-		SetFieldTextColor(tcell.ColorWhite)
+		SetFieldBackgroundColor(blue).
+		SetFieldTextColor(tcell.ColorWhite).
+		SetPlaceholderStyle(
+			tcell.StyleDefault.
+				Foreground(tcell.ColorWhite). // bright readable placeholder
+				Background(blue),
+		).
+		SetLabelColor(tcell.ColorLightBlue)
 
-	cb.hintText = tview.NewTextView().
-		SetDynamicColors(true).
-		SetText("Type : for command mode").
-		SetTextAlign(tview.AlignLeft)
+	// HINT BOX (dark background, readable text)
+	cb.hintText = tview.NewTextView()
+	cb.hintText.SetDynamicColors(true)
+	cb.hintText.SetText("[#D0D0D0]Type : for command mode") // soft white/gray
+	cb.hintText.SetTextAlign(tview.AlignLeft)
+	cb.hintText.SetBackgroundColor(tcell.NewRGBColor(18, 30, 40)) // dark
 
+	// Layout (keep dark background)
 	cb.box = tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(cb.hintText, 1, 0, false).
 		AddItem(cb.input, 1, 0, true)
+
+	cb.box.SetBackgroundColor(tcell.NewRGBColor(18, 30, 40))
 
 	return cb
 }

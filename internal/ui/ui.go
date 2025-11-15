@@ -37,7 +37,7 @@ func StartUI(_ []*Account) error {
 	// ===== Folder Selection Callback =====
 	onSelect := func(accountEmail, folderName string) {
 		logger.Info("Folder selected - Account:", accountEmail, "Folder:", folderName)
-		
+
 		// find account
 		var acc *Account
 		for _, a := range accounts {
@@ -52,7 +52,7 @@ func StartUI(_ []*Account) error {
 		}
 
 		logger.Info("Account found in UI memory, showing loader...")
-		
+
 		// show loader immediately (we're already in UI thread context)
 		logger.Info("Setting loader...")
 		emailPanel.SetLoading(NewLoader("Fetching emails..."))
@@ -60,7 +60,7 @@ func StartUI(_ []*Account) error {
 		logger.Info("Starting goroutine for email fetch...")
 		go func() {
 			logger.Info("Goroutine started for folder:", folderName)
-			
+
 			// Helper to update UI with error
 			showError := func(msg string, err error) {
 				logger.Error(msg, err)
@@ -116,9 +116,27 @@ func StartUI(_ []*Account) error {
 		logger.Info("Goroutine spawned, returning from onSelect")
 	}
 
+	// ===== Command Bar (must be created BEFORE folder panel) =====
+	logger.Info("Creating command bar...")
+	cmdBar := NewCommandBar(app)
+
+	// register commands
+	helpCmd := commands.NewHelpCommand(cmdBar.registry)
+	cmdBar.Register(helpCmd)
+	cmdBar.Register(commands.NewAddAccount())
+
 	// ===== Left Panel (Folder List) =====
 	logger.Info("Creating folder panel...")
-	fp := NewFolderPanel(onSelect)
+	fp := NewFolderPanel(onSelect, func() {
+		// Trigger !addaccount as if typed
+		addCmd := cmdBar.registry["!addaccount"]
+		cmdBar.active = addCmd
+		cmdBar.ShowMessage("Running: " + addCmd.Description())
+		addCmd.Begin(cmdBar)
+
+		// Switch focus to command bar input
+		app.SetFocus(cmdBar.input)
+	})
 
 	// load DB accounts
 	logger.Info("Loading accounts from database...")
@@ -145,7 +163,7 @@ func StartUI(_ []*Account) error {
 		logger.Info("Starting async folder load for:", acc.Email)
 		go func(account models.Account, uiAccount *Account) {
 			logger.Info("Async goroutine started for:", account.Email)
-			
+
 			logger.Info("Getting IMAP connection for folder list:", account.Email)
 			conn, err := imap.GetConnection(account)
 			if err != nil {
@@ -178,10 +196,6 @@ func StartUI(_ []*Account) error {
 	}
 
 	// ===== Command Bar =====
-	logger.Info("Creating command bar...")
-	cmdBar := NewCommandBar(app)
-
-	helpCmd := commands.NewHelpCommand(cmdBar.registry)
 	cmdBar.Register(helpCmd)
 	cmdBar.Register(commands.NewAddAccount())
 
