@@ -1,29 +1,37 @@
 package utils
 
-// we want to return the start and end indecies of a given page
-func Paginate(total, pageSize, pageNumber int) (from, to int){
-	if pageSize<=0 || pageNumber <=0 {
-		return 0, 0
+// Paginate converts pageNumber+pageSize into IMAP-style 1-based sequence numbers.
+// It ensures the range is always valid, even on the last page.
+func Paginate(total, pageSize, pageNumber int) (from, to int) {
+
+	// Default safety: never return 0,0
+	if pageSize <= 0 {
+		pageSize = 50
+	}
+	if pageNumber <= 0 {
+		pageNumber = 1
 	}
 
-	to = total - pageSize*(pageNumber-1) // 
-	from = to - pageSize + 1 // from = total = pageNumber * pageSize + 1 (this is also correct) pageNumber * pageSize = number of eamils from that are from current pageNumber from to N (we still need to)
+	// Calculate "to" position (newest-first logic)
+	to = total - pageSize*(pageNumber-1)
 
+	// Calculate "from" position
+	from = to - pageSize + 1
 
-	if (to>total){
+	// Clamp the values into valid IMAP ranges
+	if to > total {
 		to = total
 	}
-	if from <1 {
-		from =1
+	if from < 1 {
+		from = 1
 	}
-
-	if (from>to){
+	if from > to {
 		from = to
 	}
 
-
-	return from, to 
+	return from, to
 }
+
 
 
 

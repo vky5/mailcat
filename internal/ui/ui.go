@@ -95,7 +95,7 @@ func StartUI(_ []*Account) error {
 			logger.Info("Cleaned folder name:", clean)
 
 			logger.Info("Starting FetchEmails from:", clean)
-			emails, err := imap.FetchEmails(conn, clean, 0, 10)
+			emails, err := imap.FetchEmails(conn, clean, 50, 1)
 			if err != nil {
 				showError("Failed fetching from "+folderName+":", err)
 				return

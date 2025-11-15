@@ -9,49 +9,60 @@ import (
 	"github.com/vky5/mailcat/internal/utils"
 )
 
-// fetch emails
-func FetchEmails(conn *client.Client, mailbox string ,pageSize int, pageNumber int) ([]models.Email, error) {
-	// select INBOX
+// FetchEmails returns a paginated list of emails from a mailbox.
+func FetchEmails(conn *client.Client, mailbox string, pageSize int, pageNumber int) ([]models.Email, error) {
+
+	// Select the mailbox. Gmail does NOT allow selecting folders like "[Gmail]".
 	mbox, err := conn.Select(mailbox, false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %s: %v", mailbox, err)
 	}
-   if mbox.Messages == 0 {
-        return []models.Email{}, nil
-    }
 
-	from, to := utils.Paginate(int(mbox.Messages), pageSize, pageNumber) // we get the from and to values of the emails to be fetched
+	// No messages? Return empty slice.
+	if mbox.Messages == 0 {
+		return []models.Email{}, nil
+	}
 
+	// Compute "from" and "to" sequence numbers for pagination.
+	from, to := utils.Paginate(int(mbox.Messages), pageSize, pageNumber)
+
+	// Prepare sequence set for IMAP (e.g. 41–50)
 	seqset := new(imap.SeqSet)
-	seqset.AddRange(uint32(from), uint32(to)) // critical thing about this the order is guranteed.. meaning if 41th to 50 emails are fetched they are fetched in this sequence into the channel only
+	seqset.AddRange(uint32(from), uint32(to))
 
-	// prepare the channel to fetch emails of pageSize (that is the number of emails to be fetched at a certain time)
+	// IMPORTANT: Gmail rejects imap.FetchBody (no section).
+	// We must explicitly request BODY[] section.
+	section := &imap.BodySectionName{}
+
+	items := []imap.FetchItem{
+		imap.FetchEnvelope,      // From, To, Subject, Date
+		section.FetchItem(),     // BODY[] = safe body fetch compatible with Gmail
+	}
+
+	// IMAP messages are streamed into this channel.
 	messages := make(chan *imap.Message, pageSize)
 	done := make(chan error, 1)
 
-	itmes := []imap.FetchItem{imap.FetchEnvelope, imap.FetchBody} // the envelope contains from, to subject date etc and body contains attachment and actual body
+	// Run the fetch in a goroutine.
 	go func() {
-		done <- conn.Fetch(seqset, itmes, messages) // read the emails and fill it in channel of buffer size pageSize where buffers are of type imap.Message that points to that in memory
-		// once all emails have been fetched then it sends either nil or err to done and channel is closed by go-imap
+		done <- conn.Fetch(seqset, items, messages)
 	}()
 
 	var emails []models.Email
 
-	// how go knows when this channel is open or closed when reaading is done
+	// Read all messages until channel closes.
 	for msg := range messages {
-		/*
-			Go keeps reading from the channel until the channel is closed.
-			Once the channel is closed and all buffered items have been read, the loop automatically exits.
-			You don’t need to manually signal anything inside the loop.
-		*/
+		// parseMails fills your models.Email struct
 		emails = parseMails(msg, emails)
 	}
 
-	// IMAP Server → conn.Fetch() → messages channel → for loop
+	// Check if Fetch returned an error.
 	if err := <-done; err != nil {
 		return nil, fmt.Errorf("failed to fetch emails: %v", err)
 	}
 
+	// IMAP returns oldest → newest, so reverse for UI.
 	utils.ReverseSlice(emails)
+
 	return emails, nil
 }
