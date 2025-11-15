@@ -113,17 +113,18 @@ func (el *EmailListPanel) SetEmails(emails []models.Email) {
 	logger.Info("SetEmails: Calling render()")
 	el.render()
 
-	// After rendering, always move selection to the first subject row (if present).
-	// This avoids being stuck on a non-selectable cell or an out-of-range index.
+	// After rendering, move selection to the first subject row only if we have emails
 	rowCount := el.table.GetRowCount()
 	logger.Info("SetEmails: Table has", rowCount, "rows after render")
-	if rowCount > 1 {
-		// first subject row is 1 (we render starting from row=1)
-		// guard: ensure we don't select an invalid row
-		logger.Info("SetEmails: Selecting row 1")
+	
+	if len(el.emails) > 0 && rowCount > 1 {
+		// We have actual emails, select the first subject row
+		logger.Info("SetEmails: Selecting row 1 (first email)")
 		el.table.Select(1, 0)
 	} else {
-		logger.Info("SetEmails: Not enough rows to select")
+		// No emails, select the "No Emails" message (row 2)
+		logger.Info("SetEmails: No emails, selecting empty state message")
+		el.table.Select(2, 0)
 	}
 	logger.Info("SetEmails: Completed successfully")
 }
@@ -138,7 +139,7 @@ func (el *EmailListPanel) render() {
 		logger.Info("render: No emails, showing empty state")
 		cell := tview.NewTableCell("[::b][#00BFFF]📭 No Emails[-:-:-]").
 			SetAlign(tview.AlignCenter).
-			SetSelectable(false).
+			SetSelectable(true).  // Make selectable so arrow keys don't freeze
 			SetBackgroundColor(tcell.NewRGBColor(18, 30, 40))
 		el.table.SetCell(2, 0, cell)
 		logger.Info("render: Empty state cell added")
@@ -228,7 +229,7 @@ func (el *EmailListPanel) render() {
 		el.table.SetCell(row+2, 0, previewCell)
 		el.table.SetCell(row+2, 1, tview.NewTableCell("").SetBackgroundColor(bgColor).SetSelectable(false))
 
-		// Row 4: Divider
+		// Row 4: Divider (non-selectable spacing between emails)
 		dividerText := "[#2F4F4F]" + strings.Repeat("─", el.maxWidth) + "[-]"
 		dividerCell := tview.NewTableCell(dividerText).
 			SetSelectable(false).
